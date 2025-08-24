@@ -1,0 +1,41 @@
+[profile.dev]
+codegen-units = 256
+debug = false
+lto = false
+opt-level = 0
+panic = "unwind"
+strip = "debuginfo"
+
+[profile.release]
+codegen-units = 1
+debug = false
+lto = "thin"
+opt-level = 2
+panic = "unwind"
+strip = "symbols"
+
+[workspace]
+members = ["polite", "polite-cli"]
+resolver = "2"
+
+[workspace.dependencies]
+# Internal crates
+polite = { path = "polite", version = "0.1.0" }
+polite-cli = { path = "polite-cli", version = "0.1.0" }
+
+# Core dependencies
+serde = { features = ["derive"], version = "1.0" }
+# Polars integration dependencies  
+polars = { default-features = false, features = ["fmt"], version = "0.50.0" }
+rusqlite = "0.32"
+
+[workspace.package]
+authors = ["Louis Maddox <louismmx@gmail.com>"]
+description = "rusqlite × Polars interface toolkit"
+edition = "2021"
+homepage = "https://github.com/lmmx/polite"
+keywords = ["dataframe", "interface", "polars", "schema", "sqlite"]
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/lmmx/polite"
+version = "0.1.0"

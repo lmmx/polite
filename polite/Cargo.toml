@@ -1,0 +1,21 @@
+[package]
+authors.workspace = true
+categories = ["data-structures", "database"]
+description = "rusqlite × Polars bridge library"
+documentation = "https://docs.rs/polite/"
+edition.workspace = true
+homepage.workspace = true
+keywords = ["bridge", "dataframe", "polars", "sqlite"]
+license.workspace = true
+name = "polite"
+readme = "README.md"
+repository.workspace = true
+version = "0.1.0"
+
+[dependencies]
+polars.workspace = true
+rusqlite.workspace = true
+
+[dev-dependencies]
+eyre = "0.6.12"
+insta = { features = ["yaml"], version = "1.43.1" }
