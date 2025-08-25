@@ -9,7 +9,7 @@ precommit:
 
 pc:     fmt code-quality
 pc-fix: fmt code-quality-fix
-pc-ci:      code-quality
+pc-ci:  pc-fix
 
 prepush: check clippy docs
 
