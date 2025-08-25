@@ -1,31 +1,78 @@
 use polars::prelude::*;
 use rusqlite::Connection;
 
-/// Helper to map rusqlite errors into Polars errors
-fn to_polars_err(err: rusqlite::Error) -> PolarsError {
-    PolarsError::ComputeError(err.to_string().into())
-}
-
-/// Convert a SQLite query result into a Polars DataFrame
-///
-/// ⚠️ Currently returns an empty DataFrame as a placeholder.
-/// Replace row extraction and Series construction with real logic.
+/// Run a query and collect results into a Polars DataFrame
 pub fn to_dataframe(conn: &Connection, sql: &str) -> PolarsResult<DataFrame> {
-    let mut stmt = conn.prepare(sql).map_err(to_polars_err)?;
-    let mut rows = stmt.query([]).map_err(to_polars_err)?;
+    let mut stmt = conn.prepare(sql).map_err(|e| PolarsError::ComputeError(e.to_string().into()))?;
+    let column_count = stmt.column_count();
+    let column_names: Vec<String> = (0..column_count)
+        .map(|i| stmt.column_name(i).unwrap_or("").to_string())
+        .collect();
 
-    // TODO: actually read rows into columns
-    while let Some(_row) = rows.next().map_err(to_polars_err)? {
-        // Placeholder: you would extract values here
+    let mut cols: Vec<Vec<Option<String>>> = vec![Vec::new(); column_count];
+    let mut rows = stmt.query([]).map_err(|e| PolarsError::ComputeError(e.to_string().into()))?;
+    while let Some(row) = rows.next().map_err(|e| PolarsError::ComputeError(e.to_string().into()))? {
+        for (i, col) in cols.iter_mut().enumerate() {
+            let v: Result<Option<String>, _> = row.get(i);
+            col.push(v.unwrap_or(None));
+        }
     }
 
-    Ok(DataFrame::empty())
+    // Build all columns as Utf8 for now
+    let mut series = Vec::with_capacity(column_count);
+    for (name, col) in column_names.into_iter().zip(cols.into_iter()) {
+        let parsed: Vec<Option<&str>> = col.iter().map(|opt| opt.as_deref()).collect();
+        series.push(Series::new(name.into(), parsed).into());
+    }
+
+    DataFrame::new(series)
 }
 
-/// Insert a Polars DataFrame into a SQLite table
-///
-/// ⚠️ Currently a stub — implement schema derivation and INSERTs.
+/// Insert a Polars DataFrame into a SQLite table.
+/// Creates the table if it does not exist.
 pub fn from_dataframe(conn: &Connection, table: &str, df: &DataFrame) -> rusqlite::Result<()> {
-    let _ = (conn, table, df); // silence unused vars
+    // Build CREATE TABLE statement
+    let mut cols_sql = Vec::new();
+    for (name, dtype) in df.get_columns().iter().map(|s| (s.name(), s.dtype())) {
+        let sql_type = match dtype {
+            DataType::Int64 => "INTEGER",
+            DataType::Float64 => "REAL",
+            DataType::String => "TEXT",
+            _ => "TEXT", // fallback
+        };
+        cols_sql.push(format!("{} {}", name, sql_type));
+    }
+    let create_stmt = format!("CREATE TABLE IF NOT EXISTS {} ({})",
+                              table,
+                              cols_sql.join(", "));
+    conn.execute(&create_stmt, [])?;
+
+    // Build INSERT statement
+    let placeholders: Vec<String> = (0..df.width()).map(|_| "?".to_string()).collect();
+    let insert_stmt = format!(
+        "INSERT INTO {} VALUES ({})",
+        table,
+        placeholders.join(", ")
+    );
+    let mut insert = conn.prepare(&insert_stmt)?;
+
+    // Insert each row
+    for row_idx in 0..df.height() {
+        let mut values: Vec<rusqlite::types::Value> = Vec::new();
+        for series in df.get_columns() {
+            let val = match series.dtype() {
+                DataType::Int64 => series.i64().unwrap().get(row_idx)
+                    .map(|v| v.into()).unwrap_or(rusqlite::types::Value::Null),
+                DataType::Float64 => series.f64().unwrap().get(row_idx)
+                    .map(|v| v.into()).unwrap_or(rusqlite::types::Value::Null),
+                DataType::String => series.str().unwrap().get(row_idx)
+                    .map(|v| v.to_string().into()).unwrap_or(rusqlite::types::Value::Null),
+                _ => rusqlite::types::Value::Null,
+            };
+            values.push(val);
+        }
+        insert.execute(rusqlite::params_from_iter(values))?;
+    }
+
     Ok(())
 }
