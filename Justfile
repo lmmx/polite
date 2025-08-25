@@ -159,7 +159,7 @@ clean:
 
 # --------------------------------------------------------------------------------------------------
 
-# Rust release workflow using release-plz
+# Release workflow: branch check, dry-run, update changelogs, publish with release-plz
 ship:
     #!/usr/bin/env -S echo-comment --shell-flags="-euo pipefail" --color="\\033[38;5;202m"
 
@@ -202,6 +202,7 @@ ship:
     # 📦 Create releases and tags
     just publish
 
+# Final step of the release workflow (makes the crucial `release-plz release` call)
 publish mode="":
     #!/usr/bin/env -S bash -euo pipefail
     git_token=$(gh auth token 2>/dev/null) || git_token=$PUBLISH_GITHUB_TOKEN
