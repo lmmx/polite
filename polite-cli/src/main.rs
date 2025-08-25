@@ -30,8 +30,7 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let conn = connect_sqlite(db_path)?;
 
     // Special case: if SQL starts with "@" treat it as a file containing SQL
-    let sql = if sql.starts_with('@') {
-        let path = &sql[1..];
+    let sql = if let Some(path) = sql.strip_prefix('@') {
         fs::read_to_string(path)?
     } else {
         sql.clone()
@@ -40,31 +39,31 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     // If it's a SELECT, try to convert into a Polars DataFrame
     if sql.trim_start().to_uppercase().starts_with("SELECT") {
         let df = to_dataframe(&conn, &sql)?;
-        println!("{:?}", df);
+        println!("{df:?}");
     } else {
         // Otherwise just execute as a statement
         let rows = execute_query(&conn, &sql)?;
-        eprintln!("Executed successfully, {} row(s) affected", rows);
+        eprintln!("Executed successfully, {rows} row(s) affected");
     }
 
     Ok(())
 }
 
 fn print_help() {
-    println!("polite-cli — rusqlite × Polars bridge demo");
+    println!("polite — rusqlite × Polars bridge demo");
     println!();
     println!("USAGE:");
-    println!("    polite-cli <SQL> [DB_PATH]");
+    println!("    polite <SQL> [DB_PATH]");
     println!();
     println!("ARGS:");
     println!("    <SQL>       SQL statement (use @file.sql to read from file)");
     println!("    [DB_PATH]   Path to SQLite database file (defaults to in-memory)");
     println!();
     println!("EXAMPLES:");
-    println!("    polite-cli \"CREATE TABLE t (id INTEGER, name TEXT)\"");
-    println!("    polite-cli \"INSERT INTO t VALUES (1, 'Alice')\"");
-    println!("    polite-cli \"SELECT * FROM t\"");
-    println!("    polite-cli @queries.sql mydb.sqlite3");
+    println!("    polite \"CREATE TABLE t (id INTEGER, name TEXT)\"");
+    println!("    polite \"INSERT INTO t VALUES (1, 'Alice')\"");
+    println!("    polite \"SELECT * FROM t\"");
+    println!("    polite @queries.sql mydb.sqlite3");
 }
 
 #[cfg(test)]
@@ -81,13 +80,6 @@ mod tests {
     #[test]
     fn test_basic_nonselect_sql() {
         // This will hit the stubbed polite::execute_query
-        let args = vec![
-            "polite-cli".to_string(),
-            "CREATE TABLE t (id INTEGER)".to_string(),
-        ];
-        std::env::set_var("RUST_BACKTRACE", "0");
-        // Can't override env::args easily without a crate like `clap`, so
-        // this test only calls the helper functions directly for now.
         let conn = connect_sqlite(None).unwrap();
         let rows = execute_query(&conn, "CREATE TABLE t (id INTEGER)").unwrap();
         assert_eq!(rows, 0);

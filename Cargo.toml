@@ -27,7 +27,7 @@ polite-cli = { path = "polite-cli", version = "0.1.0" }
 serde = { features = ["derive"], version = "1.0" }
 # Polars integration dependencies  
 polars = { default-features = false, features = ["fmt"], version = "0.50.0" }
-rusqlite = "0.32"
+rusqlite = { features = ["bundled"], version = "0.32" }
 
 [workspace.package]
 authors = ["Louis Maddox <louismmx@gmail.com>"]
