@@ -2,7 +2,7 @@
 
 [![crates.io](https://img.shields.io/crates/v/polite.svg)](https://crates.io/crates/polite)
 [![Documentation](https://docs.rs/polite/badge.svg)](https://docs.rs/polite)
-[![MIT licensed](https://img.shields.io/crates/l/polite.svg)](https://github.com/lmmx/polite/blob/master/LICENSE)
+[![MIT licensed](https://img.shields.io/crates/l/polite)](https://github.com/lmmx/polite/blob/master/LICENSE)
 
 The core **rusqlite × Polars bridge**.
 `polite` makes it easy to move data between SQLite databases and Polars `DataFrame`s.
