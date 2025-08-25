@@ -4,27 +4,31 @@
 [![Documentation](https://docs.rs/polite-cli/badge.svg)](https://docs.rs/polite-cli)
 [![MIT licensed](https://img.shields.io/crates/l/polite-cli.svg)](https://github.com/lmmx/polite/blob/master/LICENSE)
 
-A command-line interface for [polite](https://github.com/lmmx/polite/tree/master/polite),  
+A command-line interface for [polite](https://github.com/lmmx/polite/tree/master/polite),
 the rusqlite × Polars bridge library.
 
 ## Installation
 
 ```bash
 cargo install polite-cli
-````
+```
 
 ## Usage
 
 The CLI takes:
 
 ```bash
-polite "<SQL>" [DB_PATH]
+polite "<SQL>" <DB_PATH>
 ```
 
 and automatically decides:
 
-* If the SQL starts with `SELECT` → runs it and prints a Polars `DataFrame`.
-* Otherwise → executes the statement and prints rows affected.
+- If the SQL starts with `SELECT` → runs it and prints a Polars `DataFrame`.
+- Otherwise → executes the statement and prints rows affected.
+
+⚠️ **Important:**
+ConnectorX (used internally for DataFrame reads) requires a **file-backed database**.
+You must provide a database file path (e.g. `mydb.sqlite`). In-memory databases (`:memory:`) are not supported.
 
 ### Create a table
 
@@ -44,8 +48,6 @@ polite "INSERT INTO t VALUES (1, 'Alice')" mydb.sqlite
 polite "SELECT * FROM t" mydb.sqlite
 ```
 
-By default, the database is in-memory. Provide a path to persist to a file.
-
 ## Example
 
 ```bash
@@ -56,16 +58,15 @@ polite "SELECT * FROM users" example.sqlite
 
 ## Notes
 
-- By default, the CLI uses an **in-memory SQLite database** unless `--db` is provided (so data won't persist between runs).
-- For production use, you’ll usually want to pass `--db path/to/file.sqlite`.
-- ⚠️ In-memory mode has limitations (ConnectorX cannot read from it); see the
-  [core library README](https://github.com/lmmx/polite/tree/master/polite) for details.
+- **File-backed SQLite databases only.** ConnectorX cannot read from in-memory databases.
+- Temporary files (`tempfile`) are a good option if you don’t want the DB to persist.
 
 ## Documentation
 
-* **Library crate**: [polite](https://github.com/lmmx/polite/tree/master/polite)
-* **Workspace guide**: [DEVELOPMENT.md](https://github.com/lmmx/polite/blob/master/DEVELOPMENT.md)
+- **Library crate**: [polite](https://github.com/lmmx/polite/tree/master/polite)
+- **Workspace guide**: [DEVELOPMENT.md](https://github.com/lmmx/polite/blob/master/DEVELOPMENT.md)
 
 ## License
 
-Licensed under the MIT License. See [LICENSE](https://github.com/lmmx/polite/blob/master/LICENSE) for details.
+Licensed under the MIT License.
+See [LICENSE](https://github.com/lmmx/polite/blob/master/LICENSE) for details.
