@@ -2217,6 +2217,7 @@ dependencies = [
 name = "polite"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "connectorx",
  "eyre",
  "insta",

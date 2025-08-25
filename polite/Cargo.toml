@@ -18,6 +18,7 @@ polars.workspace = true
 rusqlite.workspace = true
 
 [dev-dependencies]
+anyhow = "1.0.99"
 eyre.workspace = true
 insta.workspace = true
 tempfile.workspace = true
