@@ -56,8 +56,10 @@ polite "SELECT * FROM users" example.sqlite
 
 ## Notes
 
-* If you don’t pass a DB path, each command runs against a fresh in-memory database (so data won’t persist between runs).
-* Output for `SELECT` queries is the Polars `DataFrame` debug format (MVP). Pretty-print and export options will be added in future versions.
+- By default, the CLI uses an **in-memory SQLite database** unless `--db` is provided (so data won't persist between runs).
+- For production use, you’ll usually want to pass `--db path/to/file.sqlite`.
+- ⚠️ In-memory mode has limitations (ConnectorX cannot read from it); see the
+  [core library README](https://github.com/lmmx/polite/tree/master/polite) for details.
 
 ## Documentation
 

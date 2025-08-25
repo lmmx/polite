@@ -21,6 +21,16 @@ The core **rusqlite × Polars bridge**.
 - DataFrame output is shown in Polars’ debug format when used via the CLI.
 - No schema evolution or type inference beyond the basics (yet).
 
+Absolutely 👌 — that’s a perfect kind of “sharp edge” to call out for users. Here’s a small insert you could add to your **core library README** under *Features* or *Limitations*:
+
+#### ⚠️ Notes on SQLite Backends
+
+* `polite` uses **ConnectorX** under the hood for bulk reads into Polars `DataFrame`s.
+* **File-backed databases** (`.sqlite`, `.db`, etc.) work out of the box.
+* **In-memory databases** (`:memory:`) are **not supported by ConnectorX** — in that case, `polite` falls back to a slower row-by-row implementation using `rusqlite`.
+
+If you need consistent behavior across both modes, prefer using a temporary file-backed database in tests or workflows.
+
 ## Example
 
 ```rust

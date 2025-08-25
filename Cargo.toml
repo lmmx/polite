@@ -26,6 +26,7 @@ polite-cli = { path = "polite-cli", version = "0.1.0" }
 # Core dependencies
 serde = { features = ["derive"], version = "1.0" }
 # Polars integration dependencies  
+connectorx = { version = "0.4.3" }
 polars = { default-features = false, features = ["fmt"], version = "0.50.0" }
 rusqlite = { features = ["bundled"], version = "0.32" }
 
