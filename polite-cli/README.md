@@ -4,7 +4,8 @@
 [![Documentation](https://docs.rs/polite-cli/badge.svg)](https://docs.rs/polite-cli)
 [![MIT licensed](https://img.shields.io/crates/l/polite-cli.svg)](https://github.com/lmmx/polite/blob/master/LICENSE)
 
-A command-line interface for [polite](https://github.com/lmmx/polite/tree/master/polite), the rusqlite × Polars bridge library.
+A command-line interface for [polite](https://github.com/lmmx/polite/tree/master/polite),  
+the rusqlite × Polars bridge library.
 
 ## Installation
 
@@ -14,33 +15,49 @@ cargo install polite-cli
 
 ## Usage
 
+The CLI takes:
+
+```bash
+polite "<SQL>" [DB_PATH]
+```
+
+and automatically decides:
+
+* If the SQL starts with `SELECT` → runs it and prints a Polars `DataFrame`.
+* Otherwise → executes the statement and prints rows affected.
+
 ### Create a table
 
 ```bash
-polite-cli exec "CREATE TABLE t (id INTEGER, name TEXT)"
+polite "CREATE TABLE t (id INTEGER, name TEXT)" mydb.sqlite
 ```
 
 ### Insert a row
 
 ```bash
-polite-cli exec "INSERT INTO t VALUES (1, 'Alice')"
+polite "INSERT INTO t VALUES (1, 'Alice')" mydb.sqlite
 ```
 
 ### Query into a DataFrame
 
 ```bash
-polite-cli query "SELECT * FROM t"
+polite "SELECT * FROM t" mydb.sqlite
 ```
 
-By default, the database is in-memory. Use `--db path/to/db.sqlite` to persist to a file.
+By default, the database is in-memory. Provide a path to persist to a file.
 
 ## Example
 
 ```bash
-polite-cli --db example.sqlite exec "CREATE TABLE users (id INTEGER, name TEXT)"
-polite-cli --db example.sqlite exec "INSERT INTO users VALUES (1, 'Bob')"
-polite-cli --db example.sqlite query "SELECT * FROM users"
+polite "CREATE TABLE users (id INTEGER, name TEXT)" example.sqlite
+polite "INSERT INTO users VALUES (1, 'Bob')" example.sqlite
+polite "SELECT * FROM users" example.sqlite
 ```
+
+## Notes
+
+* If you don’t pass a DB path, each command runs against a fresh in-memory database (so data won’t persist between runs).
+* Output for `SELECT` queries is the Polars `DataFrame` debug format (MVP). Pretty-print and export options will be added in future versions.
 
 ## Documentation
 
