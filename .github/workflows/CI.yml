@@ -9,6 +9,7 @@ permissions:
   contents: write
 
 env:
+  BINARY_NAME: polite
   CARGO_INCREMENTAL: 0
   CARGO_NET_GIT_FETCH_WITH_CLI: true
   CARGO_NET_RETRY: 10
@@ -70,8 +71,8 @@ jobs:
       
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
-          bin: echo-comment,comment-echo
-          archive: echo-comment-$target
+          bin: ${{ env.BINARY_NAME }}
+          archive: ${{ env.BINARY_NAME }}-${{ matrix.target }}
           target: ${{ matrix.target }}
           tar: all
           zip: windows
