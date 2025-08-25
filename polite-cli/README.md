@@ -1,7 +1,6 @@
 # polite-cli
 
 [![crates.io](https://img.shields.io/crates/v/polite-cli.svg)](https://crates.io/crates/polite-cli)
-[![Documentation](https://docs.rs/polite-cli/badge.svg)](https://docs.rs/polite-cli)
 [![MIT licensed](https://img.shields.io/crates/l/polite-cli)](https://github.com/lmmx/polite/blob/master/LICENSE)
 
 A command-line interface for [polite](https://github.com/lmmx/polite/tree/master/polite),
