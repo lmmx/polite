@@ -13,23 +13,11 @@ repository.workspace = true
 version = "0.1.0"
 
 [dependencies]
-# ConnectorX returns Apache Arrow record batches. To convert them into
-# Polars DataFrames we use the Arrow <-> Polars FFI bridge, which requires
-# both `arrow` (upstream Arrow array & FFI types) and `polars-arrow`
-# (Polars’ Arrow interop layer).
-# - ConnectorX issue: https://github.com/sfu-db/connector-x/issues/373
-# - Polars dropped arrow-rs interop in favor of Arrow FFI: https://github.com/pola-rs/polars/pull/19312
 connectorx.workspace = true
-rusqlite.workspace = true
-
-chrono.workspace = true
 polars.workspace = true
+rusqlite.workspace = true
 
 [dev-dependencies]
 eyre.workspace = true
 insta.workspace = true
 tempfile.workspace = true
-
-[package.metadata.cargo-machete]
-# These crates are pulled in indirectly (connectorx/arrow) but not used directly
-ignored = ["chrono"]
