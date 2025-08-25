@@ -160,8 +160,10 @@ clean:
 # --------------------------------------------------------------------------------------------------
 
 # Release workflow: branch check, dry-run, update changelogs, publish with release-plz
-ship:
+#  - Pass an arg to skip dry run (for initial release as workspace member deps not yet published)
+ship no_dry_run="":
     #!/usr/bin/env -S echo-comment --shell-flags="-euo pipefail" --color="\\033[38;5;202m"
+    no_dry_run="{{no_dry_run}}"
 
     # 🔍 Refuse to run if not on master branch or not up to date with origin/master
     branch="$(git rev-parse --abbrev-ref HEAD)"
@@ -182,10 +184,14 @@ ship:
         exit 1
     fi
 
-    # 🔍 Dry-run release...
-    just publish --dry-run
-    # ✅ Dry-run went OK, proceeding to real release
-    
+    if [[ -z "$no_dry_run" ]]; then
+        just publish --dry-run
+        # ✅ Dry-run went OK, proceeding to real release
+    else
+        # ⚡ Skipping dry-run (no_dry_run=$no_dry_run)
+        :
+    fi
+
     # 🦀 Update Cargo.toml versions and changelogs
     release-plz update
     git add .
