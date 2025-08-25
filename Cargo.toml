@@ -21,14 +21,12 @@ resolver = "2"
 [workspace.dependencies]
 # Internal crates
 polite = { path = "polite", version = "0.1.0" }
-polite-cli = { path = "polite-cli", version = "0.1.0" }
-
-# Core dependencies
-serde = { features = ["derive"], version = "1.0" }
 # Polars integration dependencies  
 connectorx = { version = "0.4.3" }
+# ConnectorX arrow-arith build issue: https://github.com/apache/arrow-rs/issues/7201
+chrono = "= 0.4.39"                                                           # This side steps the issue caused by chrono's 0.4.40 release
 polars = { default-features = false, features = ["fmt"], version = "0.50.0" }
-rusqlite = { features = ["bundled"], version = "0.32" }
+rusqlite = "0.33.0"                                                           # must match connectorx
 
 [workspace.package]
 authors = ["Louis Maddox <louismmx@gmail.com>"]

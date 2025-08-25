@@ -1,3 +1,4 @@
+use connectorx::prelude::*;
 use polars::prelude::*;
 use rusqlite::Connection;
 
@@ -92,4 +93,46 @@ pub fn from_dataframe(conn: &Connection, table: &str, df: &DataFrame) -> rusqlit
     }
 
     Ok(())
+}
+
+/// Query a SQLite database into a Polars DataFrame using ConnectorX
+pub fn cx_query_sqlite(db_path: &str, sql: &str) -> PolarsResult<DataFrame> {
+    // SQLite connection string (use `:memory:` for in-memory)
+    let conn_str = format!("sqlite://{}", db_path);
+
+    // Run the query via ConnectorX
+    let df: DataFrame = load(&conn_str, sql)
+        .map_err(|e| PolarsError::ComputeError(format!("ConnectorX error: {}", e).into()))?;
+
+    Ok(df)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    #[test]
+    fn test_cx_query_sqlite() {
+        let db_path = "test.db";
+        let conn = rusqlite::Connection::open(db_path).unwrap();
+        conn.execute("DROP TABLE IF EXISTS t", []).unwrap();
+        conn.execute("CREATE TABLE t (id INTEGER, name TEXT)", [])
+            .unwrap();
+        conn.execute("INSERT INTO t VALUES (1, 'Alice')", [])
+            .unwrap();
+
+        let df = cx_query_sqlite(db_path, "SELECT * FROM t").unwrap();
+        assert_eq!(df.shape().0, 1);
+        assert!(df
+            .column("name")
+            .unwrap()
+            .utf8()
+            .unwrap()
+            .get(0)
+            .unwrap()
+            .contains("Alice"));
+
+        fs::remove_file(db_path).unwrap();
+    }
 }
