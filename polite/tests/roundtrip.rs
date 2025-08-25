@@ -1,6 +1,6 @@
 // polite/tests/roundtrip.rs
 use polars::prelude::*;
-use polite::{connect_sqlite, from_dataframe, to_dataframe};
+use polite::prelude::*;
 use tempfile::NamedTempFile;
 
 #[test]

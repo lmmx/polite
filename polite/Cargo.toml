@@ -13,6 +13,7 @@ repository.workspace = true
 version = "0.1.0"
 
 [dependencies]
+chrono.workspace = true
 connectorx.workspace = true
 polars.workspace = true
 rusqlite.workspace = true
@@ -22,3 +23,6 @@ anyhow = "1.0.99"
 eyre.workspace = true
 insta.workspace = true
 tempfile.workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["chrono"]

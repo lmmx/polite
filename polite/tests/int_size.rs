@@ -1,6 +1,6 @@
 // polite/tests/int_size.rs
 use polars::prelude::*;
-use polite::{connect_sqlite, to_dataframe};
+use polite::prelude::*;
 use tempfile::NamedTempFile;
 
 // 64-bit number just over i32::MAX

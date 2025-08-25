@@ -33,6 +33,9 @@ rusqlite = "0.33.0" # must match connectorx
 # Matched to ConnectorX 0.4.3 release
 polars = { default-features = false, features = ["fmt"], version = "0.45" }
 
+# Due to upstream issue: https://github.com/apache/arrow-rs/issues/7196
+chrono = "<=0.4.39"
+
 # --- Dev deps ---
 assert_cmd = { features = ["color", "color-auto"], version = "2.0.17" }
 eyre = "0.6.12"

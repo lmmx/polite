@@ -2,7 +2,8 @@
 
 [![crates.io: polite](https://img.shields.io/crates/v/polite.svg?label=polite)](https://crates.io/crates/polite)
 [![crates.io: polite-cli](https://img.shields.io/crates/v/polite-cli.svg?label=polite-cli)](https://crates.io/crates/polite-cli)
-[![MIT licensed](https://img.shields.io/crates/l/polite.svg)](https://github.com/lmmx/polite/blob/master/LICENSE)
+[![MIT licensed](https://img.shields.io/crates/l/polite)](https://github.com/lmmx/polite/blob/master/LICENSE)
+
 
 A **rusqlite × Polars** bridge for ergonomic conversion between SQLite databases and Polars DataFrames.
 

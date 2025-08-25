@@ -6,3 +6,4 @@ site/
 target/
 
 *.so
+*.db
