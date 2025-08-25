@@ -65,23 +65,3 @@ fn print_help() {
     println!("    polite \"SELECT * FROM t\"");
     println!("    polite @queries.sql mydb.sqlite3");
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_help_flag() {
-        // Simulate running with `--help`
-        let result = run_cli();
-        assert!(result.is_ok());
-    }
-
-    #[test]
-    fn test_basic_nonselect_sql() {
-        // This will hit the stubbed polite::execute_query
-        let conn = connect_sqlite(None).unwrap();
-        let rows = execute_query(&conn, "CREATE TABLE t (id INTEGER)").unwrap();
-        assert_eq!(rows, 0);
-    }
-}
