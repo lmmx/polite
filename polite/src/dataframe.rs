@@ -3,15 +3,22 @@ use rusqlite::Connection;
 
 /// Run a query and collect results into a Polars DataFrame
 pub fn to_dataframe(conn: &Connection, sql: &str) -> PolarsResult<DataFrame> {
-    let mut stmt = conn.prepare(sql).map_err(|e| PolarsError::ComputeError(e.to_string().into()))?;
+    let mut stmt = conn
+        .prepare(sql)
+        .map_err(|e| PolarsError::ComputeError(e.to_string().into()))?;
     let column_count = stmt.column_count();
     let column_names: Vec<String> = (0..column_count)
         .map(|i| stmt.column_name(i).unwrap_or("").to_string())
         .collect();
 
     let mut cols: Vec<Vec<Option<String>>> = vec![Vec::new(); column_count];
-    let mut rows = stmt.query([]).map_err(|e| PolarsError::ComputeError(e.to_string().into()))?;
-    while let Some(row) = rows.next().map_err(|e| PolarsError::ComputeError(e.to_string().into()))? {
+    let mut rows = stmt
+        .query([])
+        .map_err(|e| PolarsError::ComputeError(e.to_string().into()))?;
+    while let Some(row) = rows
+        .next()
+        .map_err(|e| PolarsError::ComputeError(e.to_string().into()))?
+    {
         for (i, col) in cols.iter_mut().enumerate() {
             let v: Result<Option<String>, _> = row.get(i);
             col.push(v.unwrap_or(None));
@@ -42,18 +49,16 @@ pub fn from_dataframe(conn: &Connection, table: &str, df: &DataFrame) -> rusqlit
         };
         cols_sql.push(format!("{} {}", name, sql_type));
     }
-    let create_stmt = format!("CREATE TABLE IF NOT EXISTS {} ({})",
-                              table,
-                              cols_sql.join(", "));
+    let create_stmt = format!(
+        "CREATE TABLE IF NOT EXISTS {} ({})",
+        table,
+        cols_sql.join(", ")
+    );
     conn.execute(&create_stmt, [])?;
 
     // Build INSERT statement
     let placeholders: Vec<String> = (0..df.width()).map(|_| "?".to_string()).collect();
-    let insert_stmt = format!(
-        "INSERT INTO {} VALUES ({})",
-        table,
-        placeholders.join(", ")
-    );
+    let insert_stmt = format!("INSERT INTO {} VALUES ({})", table, placeholders.join(", "));
     let mut insert = conn.prepare(&insert_stmt)?;
 
     // Insert each row
@@ -61,12 +66,24 @@ pub fn from_dataframe(conn: &Connection, table: &str, df: &DataFrame) -> rusqlit
         let mut values: Vec<rusqlite::types::Value> = Vec::new();
         for series in df.get_columns() {
             let val = match series.dtype() {
-                DataType::Int64 => series.i64().unwrap().get(row_idx)
-                    .map(|v| v.into()).unwrap_or(rusqlite::types::Value::Null),
-                DataType::Float64 => series.f64().unwrap().get(row_idx)
-                    .map(|v| v.into()).unwrap_or(rusqlite::types::Value::Null),
-                DataType::String => series.str().unwrap().get(row_idx)
-                    .map(|v| v.to_string().into()).unwrap_or(rusqlite::types::Value::Null),
+                DataType::Int64 => series
+                    .i64()
+                    .unwrap()
+                    .get(row_idx)
+                    .map(|v| v.into())
+                    .unwrap_or(rusqlite::types::Value::Null),
+                DataType::Float64 => series
+                    .f64()
+                    .unwrap()
+                    .get(row_idx)
+                    .map(|v| v.into())
+                    .unwrap_or(rusqlite::types::Value::Null),
+                DataType::String => series
+                    .str()
+                    .unwrap()
+                    .get(row_idx)
+                    .map(|v| v.to_string().into())
+                    .unwrap_or(rusqlite::types::Value::Null),
                 _ => rusqlite::types::Value::Null,
             };
             values.push(val);
