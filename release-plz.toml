@@ -15,3 +15,9 @@ commit_parsers = [
   # Separate to avoid matching all (do not sort)
   { group = "<!-- 9 -->Other", message = ".*" },
 ]
+
+[[package]]
+name = "polite"
+
+[[package]]
+name = "polite-cli"
