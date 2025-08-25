@@ -7,7 +7,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     run_cli()
 }
 
-/// Extract the main logic so tests can call it directly
 fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let args: Vec<String> = env::args().collect();
 
@@ -20,14 +19,13 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
     let sql = &args[1];
 
     // Optional: if a second arg is provided, treat it as a SQLite DB path
-    let db_path = if args.len() > 2 {
-        Some(&args[2][..])
-    } else {
-        None
+    let db_path = match args.get(2) {
+        Some(path) => path.as_str(),
+        None => {
+            eprintln!("Error: you must provide a SQLite database file path.");
+            std::process::exit(1);
+        }
     };
-
-    // Connect to SQLite (in-memory by default)
-    let conn = connect_sqlite(db_path)?;
 
     // Special case: if SQL starts with "@" treat it as a file containing SQL
     let sql = if let Some(path) = sql.strip_prefix('@') {
@@ -36,12 +34,12 @@ fn run_cli() -> Result<(), Box<dyn std::error::Error>> {
         sql.clone()
     };
 
-    // If it's a SELECT, try to convert into a Polars DataFrame
     if sql.trim_start().to_uppercase().starts_with("SELECT") {
-        let df = to_dataframe(&conn, &sql)?;
-        println!("{df:?}");
+        let df = to_dataframe(db_path, &sql)?;
+        println!("{df}");
     } else {
-        // Otherwise just execute as a statement
+        // For writes, we only need rusqlite anyway
+        let conn = connect_sqlite(Some(db_path))?;
         let rows = execute_query(&conn, &sql)?;
         eprintln!("Executed successfully, {rows} row(s) affected");
     }
