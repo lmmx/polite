@@ -180,27 +180,11 @@ example-array:
 example-complex:
     echo '{"users": [{"name": "Alice", "profile": {"age": 30, "active": true}}, {"name": "Bob", "profile": {"age": 25, "premium": false}}]}' | just run-cli
 
-# -------------------------------------
-
-# The fmt flag is just for debugging
-check-no-fmt-feat:
-    #!/usr/bin/env echo-comment
-    NO_RELEASE='"fmt"'
-    HINT="# ✋🛑 Remove the $NO_RELEASE feature flag before release!"
-    features=$(tq -r -f Cargo.toml workspace.dependencies.polars.features | grep -q $NO_RELEASE; echo $?)
-    [ "$features" -eq 1 ] && true || { echo "$HINT" | echo-comment /dev/stdin --color=bold-red; false; }
-
-demo-release:
-     just check-no-fmt-feat
-     echo "RELEASE IS GO"
-
 # --------------------------------------------------------------------------------------------------
 
 # Rust release workflow using release-plz
 ship:
     #!/usr/bin/env -S echo-comment --shell-flags="-euo pipefail" --color="\\033[38;5;202m"
-
-    just check-no-fmt-feat
 
     # 🔍 Refuse to run if not on master branch or not up to date with origin/master
     branch="$(git rev-parse --abbrev-ref HEAD)"
