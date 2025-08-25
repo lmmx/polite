@@ -1,4 +1,4 @@
-use polite::{connect_sqlite, execute_query, to_dataframe};
+use polite::prelude::*;
 use std::env;
 use std::fs;
 

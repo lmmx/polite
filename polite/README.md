@@ -14,6 +14,14 @@ The core **rusqlite × Polars bridge**.
 - Bulk-load query results into Polars `DataFrame`s (`to_dataframe`) via \[ConnectorX].
 - Write Polars `DataFrame`s into SQLite tables (`from_dataframe`).
 
+## Requirements
+
+When using `polite`, please be aware of the current upstream version restrictions:
+
+- Built against Polars **0.45** (the latest release supported by ConnectorX).
+- Pins `chrono <= 0.4.39` due to [an upstream Arrow/Polars issue](https://github.com/apache/arrow-rs/issues/7196)
+  (this will be removed once the conflict is resolved there).
+
 ## Limitations (MVP)
 
 - Supported SQLite column types:
@@ -30,10 +38,34 @@ The core **rusqlite × Polars bridge**.
 - **File-backed databases** (`.sqlite`, `.db`) are required.
 - **In-memory databases** (`:memory:`) are not supported — use a `tempfile` if you don’t want persistence.
 
+## Core functions
+
+💡 **All of these functions are also available via use `polite::prelude::*;`.**
+
+The two basic functions provided by the library are:
+
+- `to_dataframe(db_path, sql)` – run a query and return a `DataFrame`.
+- `from_dataframe(&conn, table, &df)` – write a `DataFrame` into a table.
+  Takes an open `rusqlite::Connection`, the table name to write to, and your DataFrame.
+
+`polite` also provides a couple of convenience wrappers
+(with simplified string errors and without connection handling):
+
+- `save_dataframe(db_path, table, &df)`  
+  Opens a connection and writes the DataFrame in one step.  
+  Creates and closes its own connection; use this for one-off saves.
+
+- `load_dataframe(db_path, sql)`  
+  Wraps `to_dataframe` but adds context to errors (e.g. `"Failed to load DataFrame from demo.db: no such table: users"`).  
+  This makes it clearer where the failure came from, especially if you’re working with multiple databases.
+
+These helpers are for convenience and don’t add new capabilities beyond the core API,
+but they can reduce boilerplate or give clearer error messages when debugging.
+
 ## Example
 
 ```rust
-use polite::{connect_sqlite, execute_query, from_dataframe, to_dataframe};
+use polite::prelude::*;
 use tempfile::NamedTempFile;
 
 fn main() -> anyhow::Result<()> {

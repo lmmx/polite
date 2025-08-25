@@ -1,8 +1,7 @@
-use polite::{connect_sqlite, execute_query, from_dataframe, to_dataframe};
+use polite::prelude::*;
 use tempfile::NamedTempFile;
 
-#[test]
-fn readme_demo() -> anyhow::Result<()> {
+fn main() -> anyhow::Result<()> {
     // Create a temporary file-backed SQLite DB
     let db = NamedTempFile::new()?;
     let db_path = db.path().to_str().unwrap();
