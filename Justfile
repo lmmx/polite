@@ -86,7 +86,6 @@ clippy-cli:
 test *args:
     just test-core {{args}}
     just test-cli {{args}}
-    just test-js {{args}}
 
 test-ci *args:
     #!/usr/bin/env -S echo-comment --color bright-green
@@ -105,16 +104,6 @@ test-cli *args:
     cargo nextest run {{args}}
     
 # -------------------------------------
-
-# Test CLI with example input
-run-cli input="'{\"name\": \"test\", \"value\": 42}'":
-    echo '{{input}}' | cargo run -p polite-cli
-
-# Run CLI with file
-run-cli-on *args:
-    cargo run -p polite-cli -- {{args}}
-
-# ------------------------------------
 
 install-hooks:
    pre-commit install
@@ -167,18 +156,6 @@ docs-cli:
 
 clean:
     cargo clean
-
-# -------------------------------------
-
-# Example: JSON schema inference
-example-basic:
-    just test-cli '{"name": "Alice", "age": 30}'
-
-example-array:
-    just test-cli '[{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25, "city": "NYC"}]'
-
-example-complex:
-    echo '{"users": [{"name": "Alice", "profile": {"age": 30, "active": true}}, {"name": "Bob", "profile": {"age": 25, "premium": false}}]}' | just run-cli
 
 # --------------------------------------------------------------------------------------------------
 
