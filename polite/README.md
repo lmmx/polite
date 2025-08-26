@@ -67,9 +67,9 @@ The raw API (`to_dataframe`, `from_dataframe`) exposes detailed error variants (
 
 The convenience wrappers (`load_dataframe`, `save_dataframe`) normalize those into a **single error variant per operation**:
 
-- ✅ They normalize errors:
-    - `load_dataframe` always yields `PoliteError::Load`
-    - `save_dataframe` always yields `PoliteError::Save`.
+1. `load_dataframe` always yields `PoliteError::Load`
+2. `save_dataframe` always yields `PoliteError::Save`.
+
 - ✅ You don’t have to juggle `Query`, `Arrow`, `ArrowToPolars` variants of `PoliteError`, `rusqlite::Error` etc.
 - ✅ They’re the "safe default" for people who just want “load/save a DataFrame” and don’t care which stage failed.
 - ✅ Advanced users can drop down to `to_dataframe` / `from_dataframe` for finer control and granular error inspection.
