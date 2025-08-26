@@ -11,7 +11,7 @@ The core **rusqlite × Polars bridge**.
 
 - Open SQLite databases (**file-based only**).
 - Execute arbitrary SQL statements.
-- Bulk-load query results into Polars `DataFrame`s (`to_dataframe`) via \[ConnectorX].
+- Bulk-load query results into Polars `DataFrame`s (`to_dataframe`) via [ConnectorX](https://crates.io/crates/connectorx).
 - Write Polars `DataFrame`s into SQLite tables (`from_dataframe`).
 
 ## Requirements
@@ -40,7 +40,7 @@ When using `polite`, please be aware of the current upstream version restriction
 
 ## Core functions
 
-💡 **All of these functions are also available via `use polite::prelude::*;`**
+> 💡 All of these functions are also available via `use polite::prelude::*;`
 
 The two basic functions provided by the library are:
 
