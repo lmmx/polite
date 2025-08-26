@@ -14,13 +14,12 @@ The core **rusqlite × Polars bridge**.
 - Bulk-load query results into Polars `DataFrame`s (`to_dataframe`) via [ConnectorX](https://crates.io/crates/connectorx).
 - Write Polars `DataFrame`s into SQLite tables (`from_dataframe`).
 
-## Requirements
+## Dependencies
 
-When using `polite`, please be aware of the current upstream version restrictions:
-
-- Built against Polars **0.49.1** (the latest release supported by ConnectorX).
-- Pins chrono `=0.4.39` due to [an upstream Arrow/Polars issue](https://github.com/apache/arrow-rs/issues/7196)
-  (this will be removed once the conflict is resolved there).
+- Built against Polars **0.49.1** with a lightly patched fork of the latest release of ConnectorX (0.4.4, configured for
+  only the SQLite source and Arrow destination).
+    - Pins chrono `=0.4.39` due to [an upstream Arrow/Polars issue](https://github.com/apache/arrow-rs/issues/7196)
+      (this will be removed once the conflict is resolved there).
 
 ## Limitations (MVP)
 
