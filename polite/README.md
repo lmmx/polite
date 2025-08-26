@@ -11,7 +11,7 @@ The core **rusqlite × Polars bridge**.
 
 - Open SQLite databases (**file-based only**).
 - Execute arbitrary SQL statements.
-- Bulk-load query results into Polars `DataFrame`s (`to_dataframe`) via \[ConnectorX].
+- Bulk-load query results into Polars `DataFrame`s (`to_dataframe`) via [ConnectorX](https://crates.io/crates/connectorx).
 - Write Polars `DataFrame`s into SQLite tables (`from_dataframe`).
 
 ## Requirements
@@ -40,7 +40,7 @@ When using `polite`, please be aware of the current upstream version restriction
 
 ## Core functions
 
-💡 **All of these functions are also available via use `polite::prelude::*;`.**
+> 💡 All of these functions are also available via `use polite::prelude::*;`
 
 The two basic functions provided by the library are:
 
@@ -59,49 +59,115 @@ The two basic functions provided by the library are:
   Wraps `to_dataframe` but adds context to errors (e.g. `"Failed to load DataFrame from demo.db: no such table: users"`).  
   This makes it clearer where the failure came from, especially if you’re working with multiple databases.
 
-These helpers are for convenience and don’t add new capabilities beyond the core API,
-but they can reduce boilerplate or give clearer error messages when debugging.
+### Why use these helpers?
 
-## Example
+These helpers don’t add new capabilities beyond the core API, but they provide more ergonomic errors.
+
+The raw API (`to_dataframe`, `from_dataframe`) exposes detailed error variants (`Query`, `Arrow`, `Polars`, `rusqlite`, etc.), which is useful if you want to distinguish exactly what failed.
+
+The convenience wrappers (`load_dataframe`, `save_dataframe`) normalize those into a **single error variant per operation**:
+
+1. `load_dataframe` always yields `PoliteError::Load`
+2. `save_dataframe` always yields `PoliteError::Save`
+
+- ✅ You don’t have to juggle `Query`, `Arrow`, `ArrowToPolars` variants of `PoliteError`, `rusqlite::Error` etc.
+- ✅ They’re the "safe default" for people who just want “load/save a DataFrame” and don’t care which stage failed.
+- ✅ Advanced users can drop down to `to_dataframe` / `from_dataframe` for finer control and granular error inspection.
+
+In practice, wrappers are the **recommended default** for most use cases. Drop down to the raw API when you want maximum control.
+
+## 🎤 Demo time
 
 ```rust
 use polite::prelude::*;
-use tempfile::NamedTempFile;
+use polars::prelude::*;
 
-fn main() -> anyhow::Result<()> {
-    // Create a temporary file-backed SQLite DB
-    let db = NamedTempFile::new()?;
-    let db_path = db.path().to_str().unwrap();
-
-    // Create a connection (rusqlite is used for writes)
+fn main() -> anyhow::Result<(), String> {
+    // Open (or create) a SQLite database
+    let db_path = "polite.db";
     let conn = connect_sqlite(Some(db_path))?;
 
-    // Create and populate a table
-    execute_query(&conn, "CREATE TABLE t (id INTEGER, name TEXT)")?;
-    execute_query(&conn, "INSERT INTO t VALUES (1, 'Alice')")?;
-    execute_query(&conn, "INSERT INTO t VALUES (2, 'Bob')")?;
+    execute_query(&conn, "CREATE TABLE friends_made (id INTEGER, name TEXT)")?;
 
-    // Query back into a Polars DataFrame (ConnectorX path)
-    let df = to_dataframe(db_path, "SELECT * FROM t")?;
-    println!("{:?}", df);
+    let nobody = load_dataframe(db_path, "SELECT * FROM friends_made")?;
+    println!("🤓 I am making friends in SQLite! I don't have any there yet...\n{nobody:?}");
 
-    // Write a DataFrame back into another table
-    from_dataframe(&conn, "t_copy", &df)?;
+    // Create a table to keep your friends' names in
+    execute_query(&conn, "INSERT INTO friends_made VALUES (1, 'Alice')")?;
+    execute_query(&conn, "INSERT INTO friends_made VALUES (2, 'Bob')")?;
+    execute_query(&conn, "INSERT INTO friends_made VALUES (3, 'Charlie')")?;
+
+    // Query your friends back into a Polars DataFrame
+    let dbf = to_dataframe(db_path, "SELECT * FROM friends_made")?;
+    println!("🪄 I have lovingly restored my friends into a Polars DataFrame:\n{dbf:?}");
+
+    // Add some more friends directly from a Polars DataFrame
+    let polars_friends = df! {
+        "id" => [4_i64, 5], // careful with dtypes: Polars will use i32 by default here!
+        "name" => ["Dora", "Eve"],
+    }?;
+    
+    from_dataframe(&conn, "cool_friends", &polars_friends)?;
+
+    println!("🆒 My friends from Polars are now my friends in SQLite:\n{polars_friends:?}");
+
+    // Combine both tables into one DataFrame.
+    // ⚠️ If the `cool_friends.id` column was created as `Int32` in Polars,
+    // SQLite may widen or nullify values when UNIONing with `friends_made.id`
+    // (which is `INTEGER` = i64). Use `_i64` suffix in Polars literals to match.
+    let all_friends = load_dataframe(
+        db_path,
+        "SELECT * FROM friends_made UNION ALL SELECT * FROM cool_friends ORDER BY id",
+    )?;
+    println!("🎉 All my friends are politely gathered in a DataFrame:\n{all_friends:?}");
 
     Ok(())
 }
 ```
 
 ```
+🤓 I am making friends in SQLite! I don't have any there yet...
+shape: (0, 2)
+┌─────┬──────┐
+│ id  ┆ name │
+│ --- ┆ ---  │
+│ str ┆ str  │
+╞═════╪══════╡
+└─────┴──────┘
+🪄 I have lovingly restored my friends into a Polars DataFrame:
+shape: (3, 2)
+┌─────┬─────────┐
+│ id  ┆ name    │
+│ --- ┆ ---     │
+│ i64 ┆ str     │
+╞═════╪═════════╡
+│ 1   ┆ Alice   │
+│ 2   ┆ Bob     │
+│ 3   ┆ Charlie │
+└─────┴─────────┘
+🆒 My friends from Polars are now my friends in SQLite:
 shape: (2, 2)
-┌─────┬───────┐
-│ id  ┆ name  │
-│ --- ┆ ---   │
-│ i64 ┆ str   │
-╞═════╪═══════╡
-│ 1   ┆ Alice │
-│ 2   ┆ Bob   │
-└─────┴───────┘
+┌─────┬──────┐
+│ id  ┆ name │
+│ --- ┆ ---  │
+│ i64 ┆ str  │
+╞═════╪══════╡
+│ 4   ┆ Dora │
+│ 5   ┆ Eve  │
+└─────┴──────┘
+🎉 All my friends are politely gathered in a DataFrame:
+shape: (5, 2)
+┌─────┬─────────┐
+│ id  ┆ name    │
+│ --- ┆ ---     │
+│ i64 ┆ str     │
+╞═════╪═════════╡
+│ 1   ┆ Alice   │
+│ 2   ┆ Bob     │
+│ 3   ┆ Charlie │
+│ 4   ┆ Dora    │
+│ 5   ┆ Eve     │
+└─────┴─────────┘
 ```
 
 ## Type system

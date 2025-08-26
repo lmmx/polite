@@ -102,6 +102,9 @@ test-core *args:
 [working-directory: 'polite-cli']
 test-cli *args:
     cargo nextest run {{args}}
+
+test-friends:
+    cargo nextest run -p polite -E 'test(friends)' --success-output=immediate
     
 # -------------------------------------
 

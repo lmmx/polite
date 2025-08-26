@@ -30,13 +30,16 @@
 //!
 //! - [`dataframe`] - Functions for converting between DataFrames and SQLite
 //! - [`db`] - Database connection utilities
+//! - [`error`] - Custom error types
 
 pub mod dataframe;
 pub mod db;
+pub mod error;
 
 // Re-export the main entrypoints at crate root
 pub use dataframe::{from_dataframe, to_dataframe};
 pub use db::{connect_sqlite, execute_query};
+pub use error::PoliteError;
 
 /// Common imports for polite users.
 ///
@@ -54,9 +57,9 @@ pub use db::{connect_sqlite, execute_query};
 /// from_dataframe(&conn, "backup_users", &df).unwrap();
 /// ```
 pub mod prelude {
-    pub use crate::{connect_sqlite, execute_query, from_dataframe, to_dataframe};
+    pub use crate::{connect_sqlite, execute_query, from_dataframe, to_dataframe, PoliteError};
 
-    // If you add the convenience functions, include them too:
+    // Convenience functions from lib module:
     pub use crate::{load_dataframe, save_dataframe};
 }
 
@@ -80,9 +83,11 @@ pub mod prelude {
 ///
 /// println!("Loaded {} rows", df.height());
 /// ```
-pub fn load_dataframe(db_path: &str, sql: &str) -> Result<polars::prelude::DataFrame, String> {
-    to_dataframe(db_path, sql)
-        .map_err(|e| format!("Failed to load DataFrame from {}: {}", db_path, e))
+pub fn load_dataframe(db_path: &str, sql: &str) -> Result<polars::prelude::DataFrame, PoliteError> {
+    to_dataframe(db_path, sql).map_err(|e| PoliteError::Load {
+        db_path: db_path.to_string(),
+        source: Box::new(e),
+    })
 }
 
 /// Save a DataFrame to SQLite with automatic table creation and better error handling.
@@ -113,12 +118,14 @@ pub fn save_dataframe(
     db_path: &str,
     table_name: &str,
     df: &polars::prelude::DataFrame,
-) -> Result<(), String> {
-    let conn = connect_sqlite(Some(db_path))
-        .map_err(|e| format!("Failed to connect to {}: {}", db_path, e))?;
+) -> Result<(), PoliteError> {
+    let conn = connect_sqlite(Some(db_path))?;
 
-    from_dataframe(&conn, table_name, df)
-        .map_err(|e| format!("Failed to save DataFrame to table '{}': {}", table_name, e))?;
+    from_dataframe(&conn, table_name, df).map_err(|e| PoliteError::Save {
+        db_path: db_path.to_string(),
+        table_name: table_name.to_string(),
+        source: Box::new(e),
+    })?;
 
     Ok(())
 }
