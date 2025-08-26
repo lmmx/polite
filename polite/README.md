@@ -40,7 +40,7 @@ When using `polite`, please be aware of the current upstream version restriction
 
 ## Core functions
 
-💡 **All of these functions are also available via use `polite::prelude::*;`.**
+💡 **All of these functions are also available via `use polite::prelude::*;`**
 
 The two basic functions provided by the library are:
 
