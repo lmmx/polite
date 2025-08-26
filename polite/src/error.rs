@@ -54,6 +54,12 @@ pub enum PoliteError {
         db_path: String,
         table_name: String,
         #[source]
+        source: Box<dyn std::error::Error + Send + Sync>, // now matches Load variant
+    },
+
+    #[error("SQLite error: {source}")]
+    Sqlite {
+        #[source]
         source: rusqlite::Error,
     },
 }

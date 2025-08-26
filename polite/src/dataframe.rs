@@ -6,11 +6,20 @@ use rusqlite::types::Value;
 use rusqlite::Connection as SqliteConn;
 use std::convert::TryFrom;
 
+// fn save_err(db_path: &str, table: &str, e: rusqlite::Error) -> PoliteError {
+//     PoliteError::Sqlite { source: e }
+//     // PoliteError::Save {
+//     //     db_path: db_path.to_string(),
+//     //     table_name: table.to_string(),
+//     //     source: e,
+//     // }
+// }
+
 fn save_err(db_path: &str, table: &str, e: rusqlite::Error) -> PoliteError {
     PoliteError::Save {
         db_path: db_path.to_string(),
         table_name: table.to_string(),
-        source: e,
+        source: Box::new(PoliteError::Sqlite { source: e }),
     }
 }
 

@@ -120,7 +120,12 @@ pub fn save_dataframe(
     df: &polars::prelude::DataFrame,
 ) -> Result<(), PoliteError> {
     let conn = connect_sqlite(Some(db_path))?;
-    from_dataframe(&conn, table_name, df)?;
+
+    from_dataframe(&conn, table_name, df).map_err(|e| PoliteError::Save {
+        db_path: db_path.to_string(),
+        table_name: table_name.to_string(),
+        source: Box::new(e),
+    })?;
 
     Ok(())
 }
