@@ -18,7 +18,7 @@ The core **rusqlite × Polars bridge**.
 
 When using `polite`, please be aware of the current upstream version restrictions:
 
-- Built against Polars **0.45** (the latest release supported by ConnectorX).
+- Built against Polars **0.49.1** (the latest release supported by ConnectorX).
 - Pins chrono `=0.4.39` due to [an upstream Arrow/Polars issue](https://github.com/apache/arrow-rs/issues/7196)
   (this will be removed once the conflict is resolved there).
 
@@ -169,10 +169,6 @@ shape: (5, 2)
 │ 5   ┆ Eve     │
 └─────┴─────────┘
 ```
-
-- Note: the minor bug here is in the `id` column's `str` dtype when the DataFrame is empty: this is
-  a [known issue](https://github.com/lmmx/polite/issues/10) that will be solved by the next
-  release of connectorx (0.4.4)
 
 ## Type system
 
