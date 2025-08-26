@@ -36,6 +36,9 @@ polars = { default-features = false, features = ["fmt"], version = "0.45" }
 # Due to upstream issue: https://github.com/apache/arrow-rs/issues/7196
 chrono = "<=0.4.39"
 
+# Used for custom error types
+thiserror = "2.0.16"
+
 # --- Dev deps ---
 assert_cmd = { features = ["color", "color-auto"], version = "2.0.17" }
 eyre = "0.6.12"

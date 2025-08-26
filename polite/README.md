@@ -66,42 +66,90 @@ but they can reduce boilerplate or give clearer error messages when debugging.
 
 ```rust
 use polite::prelude::*;
-use tempfile::NamedTempFile;
+use polars::prelude::*;
 
-fn main() -> anyhow::Result<()> {
-    // Create a temporary file-backed SQLite DB
-    let db = NamedTempFile::new()?;
-    let db_path = db.path().to_str().unwrap();
-
-    // Create a connection (rusqlite is used for writes)
+fn main() -> anyhow::Result<(), String> {
+    // Open (or create) a SQLite database
+    let db_path = "polite.db";
     let conn = connect_sqlite(Some(db_path))?;
 
-    // Create and populate a table
-    execute_query(&conn, "CREATE TABLE t (id INTEGER, name TEXT)")?;
-    execute_query(&conn, "INSERT INTO t VALUES (1, 'Alice')")?;
-    execute_query(&conn, "INSERT INTO t VALUES (2, 'Bob')")?;
+    execute_query(&conn, "CREATE TABLE friends_made (id INTEGER, name TEXT)")?;
 
-    // Query back into a Polars DataFrame (ConnectorX path)
-    let df = to_dataframe(db_path, "SELECT * FROM t")?;
-    println!("{:?}", df);
+    let nobody = load_dataframe(db_path, "SELECT * FROM friends_made")?;
+    println!("🤓 I am making friends in SQLite! I don't have any there yet...\n{nobody:?}");
 
-    // Write a DataFrame back into another table
-    from_dataframe(&conn, "t_copy", &df)?;
+    // Create a table to keep your friends' names in
+    execute_query(&conn, "INSERT INTO friends_made VALUES (1, 'Alice')")?;
+    execute_query(&conn, "INSERT INTO friends_made VALUES (2, 'Bob')")?;
+    execute_query(&conn, "INSERT INTO friends_made VALUES (3, 'Charlie')")?;
+
+    // Query your friends back into a Polars DataFrame
+    let dbf = to_dataframe(db_path, "SELECT * FROM friends_made")?;
+    println!("🪄 I have lovingly restored my friends into a Polars DataFrame:\n{dbf:?}");
+
+    // Add some more friends directly from a Polars DataFrame
+    let polars_friends = df! {
+        "id" => [4, 5],
+        "name" => ["Dora", "Eve"],
+    }?;
+    
+    from_dataframe(&conn, "cool_friends", &polars_friends)?;
+
+    println!("🆒 My friends from Polars are now my friends in SQLite:\n{polars_friends:?}");
+
+    let all_friends = load_dataframe(
+        db_path,
+        "SELECT * FROM friends_made UNION ALL SELECT * FROM cool_friends ORDER BY id",
+    )?;
+    println!("🎉 All my friends are politely gathered in a DataFrame:\n{all_friends:?}");
 
     Ok(())
 }
 ```
 
 ```
+🤓 I am making friends in SQLite! I don't have any there yet...
+shape: (0, 2)
+┌─────┬──────┐
+│ id  ┆ name │
+│ --- ┆ ---  │
+│ str ┆ str  │
+╞═════╪══════╡
+└─────┴──────┘
+🪄 I have lovingly restored my friends into a Polars DataFrame:
+shape: (3, 2)
+┌─────┬─────────┐
+│ id  ┆ name    │
+│ --- ┆ ---     │
+│ i64 ┆ str     │
+╞═════╪═════════╡
+│ 1   ┆ Alice   │
+│ 2   ┆ Bob     │
+│ 3   ┆ Charlie │
+└─────┴─────────┘
+🆒 My friends from Polars are now my friends in SQLite:
 shape: (2, 2)
-┌─────┬───────┐
-│ id  ┆ name  │
-│ --- ┆ ---   │
-│ i64 ┆ str   │
-╞═════╪═══════╡
-│ 1   ┆ Alice │
-│ 2   ┆ Bob   │
-└─────┴───────┘
+┌─────┬──────┐
+│ id  ┆ name │
+│ --- ┆ ---  │
+│ i32 ┆ str  │
+╞═════╪══════╡
+│ 4   ┆ Dora │
+│ 5   ┆ Eve  │
+└─────┴──────┘
+🎉 All my friends are politely gathered in a DataFrame:
+shape: (5, 2)
+┌──────┬─────────┐
+│ id   ┆ name    │
+│ ---  ┆ ---     │
+│ i64  ┆ str     │
+╞══════╪═════════╡
+│ null ┆ Dora    │
+│ null ┆ Eve     │
+│ 1    ┆ Alice   │
+│ 2    ┆ Bob     │
+│ 3    ┆ Charlie │
+└──────┴─────────┘
 ```
 
 ## Type system

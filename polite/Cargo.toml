@@ -17,6 +17,7 @@ chrono.workspace = true
 connectorx.workspace = true
 polars.workspace = true
 rusqlite.workspace = true
+thiserror.workspace = true
 
 [dev-dependencies]
 anyhow = "1.0.99"

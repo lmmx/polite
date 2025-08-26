@@ -2225,6 +2225,7 @@ dependencies = [
  "polars",
  "rusqlite",
  "tempfile",
+ "thiserror 2.0.16",
 ]
 
 [[package]]
