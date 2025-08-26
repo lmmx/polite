@@ -1,7 +1,7 @@
 #!/usr/bin/env rust-script
 //! ```cargo
 //! [dependencies]
-//! polite = "0.1.1"
+//! polite = "0.1.2"
 //! anyhow = "*"
 //! ```
 
