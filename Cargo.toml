@@ -34,7 +34,7 @@ rusqlite = "0.33.0" # must match connectorx
 polars = { default-features = false, features = ["fmt"], version = "0.45" }
 
 # Due to upstream issue: https://github.com/apache/arrow-rs/issues/7196
-chrono = "<=0.4.39"
+chrono = "=0.4.39"
 
 # Used for custom error types
 thiserror = "2.0.16"
