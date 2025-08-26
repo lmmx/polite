@@ -32,6 +32,7 @@
 //! - [`db`] - Database connection utilities
 //! - [`error`] - Custom error types
 
+mod connectorx;
 pub mod dataframe;
 pub mod db;
 pub mod error;

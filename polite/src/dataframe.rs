@@ -1,6 +1,6 @@
+use crate::connectorx::prelude::*;
 use crate::types::schema_from_sqlite;
 use crate::PoliteError;
-use connectorx::prelude::*;
 use polars::prelude::*;
 use rusqlite::types::Value;
 use rusqlite::Connection as SqliteConn;
