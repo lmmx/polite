@@ -103,7 +103,7 @@ fn main() -> anyhow::Result<(), String> {
 
     // Add some more friends directly from a Polars DataFrame
     let polars_friends = df! {
-        "id" => [4, 5],
+        "id" => [4_i64, 5], // careful with dtypes: Polars will use i32 by default here!
         "name" => ["Dora", "Eve"],
     }?;
     
@@ -111,6 +111,10 @@ fn main() -> anyhow::Result<(), String> {
 
     println!("🆒 My friends from Polars are now my friends in SQLite:\n{polars_friends:?}");
 
+    // Combine both tables into one DataFrame.
+    // ⚠️ If the `cool_friends.id` column was created as `Int32` in Polars,
+    // SQLite may widen or nullify values when UNIONing with `friends_made.id`
+    // (which is `INTEGER` = i64). Use `_i64` suffix in Polars literals to match.
     let all_friends = load_dataframe(
         db_path,
         "SELECT * FROM friends_made UNION ALL SELECT * FROM cool_friends ORDER BY id",
@@ -146,24 +150,24 @@ shape: (2, 2)
 ┌─────┬──────┐
 │ id  ┆ name │
 │ --- ┆ ---  │
-│ i32 ┆ str  │
+│ i64 ┆ str  │
 ╞═════╪══════╡
 │ 4   ┆ Dora │
 │ 5   ┆ Eve  │
 └─────┴──────┘
 🎉 All my friends are politely gathered in a DataFrame:
 shape: (5, 2)
-┌──────┬─────────┐
-│ id   ┆ name    │
-│ ---  ┆ ---     │
-│ i64  ┆ str     │
-╞══════╪═════════╡
-│ null ┆ Dora    │
-│ null ┆ Eve     │
-│ 1    ┆ Alice   │
-│ 2    ┆ Bob     │
-│ 3    ┆ Charlie │
-└──────┴─────────┘
+┌─────┬─────────┐
+│ id  ┆ name    │
+│ --- ┆ ---     │
+│ i64 ┆ str     │
+╞═════╪═════════╡
+│ 1   ┆ Alice   │
+│ 2   ┆ Bob     │
+│ 3   ┆ Charlie │
+│ 4   ┆ Dora    │
+│ 5   ┆ Eve     │
+└─────┴─────────┘
 ```
 
 ## Type system

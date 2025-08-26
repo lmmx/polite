@@ -25,7 +25,7 @@ fn test_friends_db() -> anyhow::Result<()> {
 
     // Add some more friends directly from a Polars DataFrame
     let polars_friends = df! {
-        "id" => [4, 5],
+        "id" => [4_i64, 5],
         "name" => ["Dora", "Eve"],
     }?;
 
