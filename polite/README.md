@@ -171,6 +171,10 @@ shape: (5, 2)
 └─────┴─────────┘
 ```
 
+- Note: the minor bug here is in the `id` column's `str` dtype when the DataFrame is empty: this is
+  a [known issue](https://github.com/lmmx/polite/issues/10) that will be solved by the next
+  release of connectorx (0.4.4)
+
 ## Type system
 
 Note that the type system used by `rusqlite` via ConnectorX is as shown
