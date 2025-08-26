@@ -27,12 +27,28 @@ connectorx = { default-features = false, features = [
   "branch",
   "dst_polars",
   "src_sqlite",
-], version = "0.4.3" }
-# rusqlite = { features = ["column_metadata"], version = "0.36+" } # must match connectorx
-rusqlite = { version = "0.33.0" } # must match connectorx
+], path = "../connector-x/connectorx" }
+# connectorx = { default-features = false, features = [
+#   "branch",
+#   "dst_polars",
+#   "src_sqlite",
+# ], git = "https://github.com/lmmx/connector-x", branch = "upgrade-sql" }
+#
+# connectorx = { default-features = false, features = [
+#   "branch",
+#   "dst_polars",
+#   "src_sqlite",
+# ], version = "0.4.3" }
+rusqlite = { features = [
+  "column_metadata",
+], version = "0.37" } # must match connectorx
+# rusqlite = { version = "0.33.0" } # must match connectorx
 
 # Matched to ConnectorX 0.4.3 release
-polars = { default-features = false, features = ["fmt"], version = "0.45" }
+polars = { default-features = false, features = ["fmt"], version = "0.49.1" }
+# polars = { default-features = false, features = ["fmt"], version = "0.45" }
+planus = { version = "=1.1.1" }
+polars-arrow-format = { path = "../arrow-format" }
 
 # Due to upstream issue: https://github.com/apache/arrow-rs/issues/7196
 chrono = "=0.4.39"

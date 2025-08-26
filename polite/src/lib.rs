@@ -35,6 +35,7 @@
 pub mod dataframe;
 pub mod db;
 pub mod error;
+pub(crate) mod types;
 
 // Re-export the main entrypoints at crate root
 pub use dataframe::{from_dataframe, to_dataframe};
