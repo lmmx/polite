@@ -59,10 +59,24 @@ The two basic functions provided by the library are:
   Wraps `to_dataframe` but adds context to errors (e.g. `"Failed to load DataFrame from demo.db: no such table: users"`).  
   This makes it clearer where the failure came from, especially if you’re working with multiple databases.
 
-These helpers are for convenience and don’t add new capabilities beyond the core API,
-but they can reduce boilerplate or give clearer error messages when debugging.
+### Why use these helpers?
 
-## Example
+These helpers don’t add new capabilities beyond the core API, but they provide more ergonomic errors.
+
+The raw API (`to_dataframe`, `from_dataframe`) exposes detailed error variants (`Query`, `Arrow`, `Polars`, `rusqlite`, etc.), which is useful if you want to distinguish exactly what failed.
+
+The convenience wrappers (`load_dataframe`, `save_dataframe`) normalize those into a **single error variant per operation**:
+
+- ✅ They normalize errors:
+    - `load_dataframe` always yields `PoliteError::Load`
+    - `save_dataframe` always yields `PoliteError::Save`.
+- ✅ You don’t have to juggle `Query`, `Arrow`, `ArrowToPolars` variants of `PoliteError`, `rusqlite::Error` etc.
+- ✅ They’re the "safe default" for people who just want “load/save a DataFrame” and don’t care which stage failed.
+- ✅ Advanced users can drop down to `to_dataframe` / `from_dataframe` for finer control and granular error inspection.
+
+In practice, wrappers are the **recommended default** for most use cases. Drop down to the raw API when you want maximum control.
+
+## 🎤 Demo time
 
 ```rust
 use polite::prelude::*;
