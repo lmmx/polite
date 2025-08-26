@@ -21,6 +21,7 @@ When using `polite`, please be aware of the current upstream version restriction
 - Built against Polars **0.45** (the latest release supported by ConnectorX).
 - Pins `chrono <= 0.4.39` due to [an upstream Arrow/Polars issue](https://github.com/apache/arrow-rs/issues/7196)
   (this will be removed once the conflict is resolved there).
+    - (Recommended) pin the chrono crate to `=0.4.39` in your dependencies.
 
 ## Limitations (MVP)
 
