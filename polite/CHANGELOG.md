@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.2](https://github.com/lmmx/polite/compare/polite-v0.1.1...polite-v0.1.2) - 2025-08-26
+
+### <!-- 4 -->Documentation
+
+- just add a note on chrono pinning in crates using polite
+
+### <!-- 9 -->Other
+
+- pre-emptive fix for empty DF schema bug (unused until next connectorx release) ([#11](https://github.com/lmmx/polite/pull/11))
+
 ## [0.1.1](https://github.com/lmmx/polite/compare/polite-v0.1.0...polite-v0.1.1) - 2025-08-26
 
 ### <!-- 1 -->Features

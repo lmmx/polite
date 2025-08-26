@@ -20,7 +20,7 @@ resolver = "2"
 
 [workspace.dependencies]
 # Internal crates
-polite = { path = "polite", version = "0.1.1" }
+polite = { path = "polite", version = "0.1.2" }
 
 # Polars integration dependencies  
 connectorx = { default-features = false, features = [
