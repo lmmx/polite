@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3](https://github.com/lmmx/polite/compare/polite-v0.1.2...polite-v0.1.3) - 2025-08-26
+
+### <!-- 4 -->Documentation
+
+- *(chrono)* specify exact pin, remove need for users to pin it too
+
+### <!-- 8 -->Styling
+
+- no linting beneath the vendor level ([#14](https://github.com/lmmx/polite/pull/14))
+
+### <!-- 9 -->Other
+
+- [PENDING] fix: patch schema when there are no rows ([#13](https://github.com/lmmx/polite/pull/13))
+
 ## [0.1.2](https://github.com/lmmx/polite/compare/polite-v0.1.1...polite-v0.1.2) - 2025-08-26
 
 ### <!-- 4 -->Documentation

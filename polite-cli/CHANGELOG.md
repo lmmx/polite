@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.3](https://github.com/lmmx/polite/compare/polite-cli-v0.1.2...polite-cli-v0.1.3) - 2025-08-26
+
+### <!-- 9 -->Other
+
+- update Cargo.lock dependencies
+
 ## [0.1.2](https://github.com/lmmx/polite/compare/polite-cli-v0.1.1...polite-cli-v0.1.2) - 2025-08-26
 
 ### <!-- 9 -->Other
