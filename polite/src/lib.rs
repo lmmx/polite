@@ -84,14 +84,10 @@ pub mod prelude {
 /// println!("Loaded {} rows", df.height());
 /// ```
 pub fn load_dataframe(db_path: &str, sql: &str) -> Result<polars::prelude::DataFrame, PoliteError> {
-    match to_dataframe(db_path, sql) {
-        Ok(df) => Ok(df),
-        Err(PoliteError::DataFrame { source }) => Err(PoliteError::Load {
-            db_path: db_path.to_string(),
-            source,
-        }),
-        Err(e) => Err(e), // forward other error variants unchanged
-    }
+    to_dataframe(db_path, sql).map_err(|e| PoliteError::Load {
+        db_path: db_path.to_string(),
+        source: Box::new(e),
+    })
 }
 
 /// Save a DataFrame to SQLite with automatic table creation and better error handling.
@@ -125,5 +121,6 @@ pub fn save_dataframe(
 ) -> Result<(), PoliteError> {
     let conn = connect_sqlite(Some(db_path))?;
     from_dataframe(&conn, table_name, df)?;
+
     Ok(())
 }

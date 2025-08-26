@@ -21,6 +21,7 @@ fn test_load_wrapper_error() {
     let db = NamedTempFile::new().unwrap();
     let db_path = db.path().to_str().unwrap();
     let err = load_dataframe(db_path, "SELECT * FROM nope").unwrap_err();
+    eprintln!("Got error variant: {err:?}");
     assert!(matches!(err, PoliteError::Load { .. }));
 }
 
@@ -38,6 +39,7 @@ fn test_load_dataframe_error_variant() {
 
     // table does not exist -> should trigger PoliteError::Load
     let err = load_dataframe(db_path, "SELECT * FROM imaginary").unwrap_err();
+    eprintln!("Got error variant: {err:?}");
     assert!(matches!(err, PoliteError::Load { .. }));
 }
 

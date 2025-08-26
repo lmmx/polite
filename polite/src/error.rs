@@ -39,7 +39,7 @@ pub enum PoliteError {
     Load {
         db_path: String,
         #[source]
-        source: polars::error::PolarsError,
+        source: Box<dyn std::error::Error + Send + Sync>, // allow wrapping any error
     },
 
     #[error("Failed to run query on {db_path}: {source}")]
