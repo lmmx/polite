@@ -1,4 +1,6 @@
+#![allow(clippy::all)]
 #![allow(dead_code)]
+#![allow(rustdoc::all)]
 #![allow(clippy::upper_case_acronyms)]
 
 //! # ConnectorX

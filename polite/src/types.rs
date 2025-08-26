@@ -7,7 +7,7 @@ pub(crate) fn schema_from_sqlite(stmt: &Statement) -> Schema {
         let name = col.name();
         let decl_type = col.decl_type();
 
-        let dtype = match decl_type.as_deref() {
+        let dtype = match decl_type {
             Some("INTEGER") => DataType::Int64,
             Some("REAL") => DataType::Float64,
             Some("TEXT") => DataType::String,
