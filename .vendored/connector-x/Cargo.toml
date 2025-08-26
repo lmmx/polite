@@ -1,0 +1,13 @@
+[workspace]
+default-members = ["connectorx"]
+members = ["connectorx", "connectorx-cpp"]
+resolver = "2"
+
+[profile.release]
+debug = true
+lto = true
+
+[workspace.dependencies]
+arrow = { features = ["ffi", "prettyprint"], version = "54" }
+polars = { features = ["dtype-u16", "dtype-u8", "lazy"], version = "0.49" }
+polars-arrow = { version = "0.49" }

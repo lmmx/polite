@@ -6,13 +6,13 @@ pub enum PoliteError {
     Arrow {
         db_path: String,
         #[source]
-        source: connectorx::errors::ConnectorXOutError,
+        source: crate::connectorx::errors::ConnectorXOutError,
     },
 
     #[error("Arrow → Polars conversion failed: {source}")]
     ArrowToPolars {
         #[source]
-        source: connectorx::destinations::arrow::ArrowDestinationError,
+        source: crate::connectorx::destinations::arrow::ArrowDestinationError,
     },
 
     #[error("Failed to connect to {db_path}: {source}")]
@@ -46,7 +46,7 @@ pub enum PoliteError {
     Query {
         db_path: String,
         #[source]
-        source: connectorx::errors::ConnectorXError,
+        source: crate::connectorx::errors::ConnectorXError,
     },
 
     #[error("Failed to save DataFrame to table '{table_name}' in {db_path}: {source}")]

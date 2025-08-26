@@ -1,18 +1,10 @@
+use crate::connectorx::prelude::*;
+use crate::types::schema_from_sqlite;
 use crate::PoliteError;
-use connectorx::prelude::*;
 use polars::prelude::*;
 use rusqlite::types::Value;
 use rusqlite::Connection as SqliteConn;
 use std::convert::TryFrom;
-
-// fn save_err(db_path: &str, table: &str, e: rusqlite::Error) -> PoliteError {
-//     PoliteError::Sqlite { source: e }
-//     // PoliteError::Save {
-//     //     db_path: db_path.to_string(),
-//     //     table_name: table.to_string(),
-//     //     source: e,
-//     // }
-// }
 
 fn save_err(db_path: &str, table: &str, e: rusqlite::Error) -> PoliteError {
     PoliteError::Save {
@@ -30,7 +22,7 @@ pub fn to_dataframe(db_path: &str, sql: &str) -> Result<DataFrame, PoliteError> 
         source: e,
     })?;
 
-    let _stmt = match preflight.prepare(sql) {
+    let stmt = match preflight.prepare(sql) {
         Ok(stmt) => stmt,
         Err(e) => {
             return Err(PoliteError::Query {
@@ -61,31 +53,10 @@ pub fn to_dataframe(db_path: &str, sql: &str) -> Result<DataFrame, PoliteError> 
         .polars()
         .map_err(|e| PoliteError::ArrowToPolars { source: e })?;
 
-    // if df.height() == 0 {
-    //     let cols = stmt.columns();
-    //     let metas = stmt.columns_with_metadata();
-    //     for (col, meta) in cols.iter().zip(metas.iter()) {
-    //         let name = col.name();
-    //         let decl_type = col.decl_type();
-    //         let table = meta.table_name();
-    //         eprintln!("{}.{} declared as {:?}", table.unwrap_or(""), name, decl_type);
-    //     }
-    //
-    //     // fix schema with our helper
-    //     if let Ok(schema) = crate::types::schema_from_sqlite(&conn, &table) {
-    //         let mut cols = Vec::new();
-    //         for (name, ts) in schema {
-    //             let dtype = match ts {
-    //                 SQLiteTypeSystem::Int8(_) => DataType::Int64,
-    //                 SQLiteTypeSystem::Real(_) => DataType::Float64,
-    //                 SQLiteTypeSystem::Text(_) => DataType::String,
-    //                 _ => DataType::String,
-    //             };
-    //             cols.push(Series::full_null(&name, 0, &dtype));
-    //         }
-    //         df = DataFrame::new(cols).map_err(PoliteError::DataFrame)?;
-    //     }
-    // }
+    if df.height() == 0 {
+        let schema = schema_from_sqlite(&stmt);
+        return Ok(DataFrame::empty_with_schema(&schema));
+    }
 
     Ok(df)
 }

@@ -14,13 +14,12 @@ The core **rusqlite × Polars bridge**.
 - Bulk-load query results into Polars `DataFrame`s (`to_dataframe`) via [ConnectorX](https://crates.io/crates/connectorx).
 - Write Polars `DataFrame`s into SQLite tables (`from_dataframe`).
 
-## Requirements
+## Dependencies
 
-When using `polite`, please be aware of the current upstream version restrictions:
-
-- Built against Polars **0.45** (the latest release supported by ConnectorX).
-- Pins chrono `=0.4.39` due to [an upstream Arrow/Polars issue](https://github.com/apache/arrow-rs/issues/7196)
-  (this will be removed once the conflict is resolved there).
+- Built against Polars **0.49.1** with a lightly patched fork of the latest release of ConnectorX (0.4.4, configured for
+  only the SQLite source and Arrow destination).
+    - Pins chrono `=0.4.39` due to [an upstream Arrow/Polars issue](https://github.com/apache/arrow-rs/issues/7196)
+      (this will be removed once the conflict is resolved there).
 
 ## Limitations (MVP)
 
@@ -131,7 +130,7 @@ shape: (0, 2)
 ┌─────┬──────┐
 │ id  ┆ name │
 │ --- ┆ ---  │
-│ str ┆ str  │
+│ i64 ┆ str  │
 ╞═════╪══════╡
 └─────┴──────┘
 🪄 I have lovingly restored my friends into a Polars DataFrame:
@@ -169,10 +168,6 @@ shape: (5, 2)
 │ 5   ┆ Eve     │
 └─────┴─────────┘
 ```
-
-- Note: the minor bug here is in the `id` column's `str` dtype when the DataFrame is empty: this is
-  a [known issue](https://github.com/lmmx/polite/issues/10) that will be solved by the next
-  release of connectorx (0.4.4)
 
 ## Type system
 
