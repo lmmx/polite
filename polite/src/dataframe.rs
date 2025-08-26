@@ -1,5 +1,4 @@
 use crate::PoliteError;
-use connectorx::errors::ConnectorXError;
 use connectorx::prelude::*;
 use polars::prelude::*;
 use rusqlite::types::Value;
@@ -31,12 +30,15 @@ pub fn to_dataframe(db_path: &str, sql: &str) -> Result<DataFrame, PoliteError> 
         source: e,
     })?;
 
-    if let Err(e) = preflight.prepare(sql) {
-        return Err(PoliteError::Query {
-            db_path: db_path.to_string(),
-            source: ConnectorXError::SqlQueryNotSupported(e.to_string()),
-        });
-    }
+    let _stmt = match preflight.prepare(sql) {
+        Ok(stmt) => stmt,
+        Err(e) => {
+            return Err(PoliteError::Query {
+                db_path: db_path.to_string(),
+                source: ConnectorXError::SqlQueryNotSupported(e.to_string()),
+            });
+        }
+    };
 
     // ConnectorX connection
     let conn = SourceConn::try_from(format!("sqlite://{}", db_path).as_str()).map_err(|e| {
@@ -58,6 +60,32 @@ pub fn to_dataframe(db_path: &str, sql: &str) -> Result<DataFrame, PoliteError> 
     let df = arrow
         .polars()
         .map_err(|e| PoliteError::ArrowToPolars { source: e })?;
+
+    // if df.height() == 0 {
+    //     let cols = stmt.columns();
+    //     let metas = stmt.columns_with_metadata();
+    //     for (col, meta) in cols.iter().zip(metas.iter()) {
+    //         let name = col.name();
+    //         let decl_type = col.decl_type();
+    //         let table = meta.table_name();
+    //         eprintln!("{}.{} declared as {:?}", table.unwrap_or(""), name, decl_type);
+    //     }
+    //
+    //     // fix schema with our helper
+    //     if let Ok(schema) = crate::types::schema_from_sqlite(&conn, &table) {
+    //         let mut cols = Vec::new();
+    //         for (name, ts) in schema {
+    //             let dtype = match ts {
+    //                 SQLiteTypeSystem::Int8(_) => DataType::Int64,
+    //                 SQLiteTypeSystem::Real(_) => DataType::Float64,
+    //                 SQLiteTypeSystem::Text(_) => DataType::String,
+    //                 _ => DataType::String,
+    //             };
+    //             cols.push(Series::full_null(&name, 0, &dtype));
+    //         }
+    //         df = DataFrame::new(cols).map_err(PoliteError::DataFrame)?;
+    //     }
+    // }
 
     Ok(df)
 }
